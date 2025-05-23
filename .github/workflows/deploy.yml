@@ -5,6 +5,11 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write # 코드 푸시(write) 권한 활성화
+  pages: write # pages 관련 권한(필요 시)
+  id-token: write # OIDC 인증용(필요 시)
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
