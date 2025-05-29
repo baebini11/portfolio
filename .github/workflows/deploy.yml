@@ -37,10 +37,10 @@ jobs:
       # --- 여기에 사용자 정보를 설정해야 합니다 ---
       - name: Configure Git author
         run: |
-          git config --global user.name "baebini"
+          git config --global user.name "baebini11"
           git config --global user.email "baebini1997@gmail.com"
 
       - name: Deploy to GitHub Pages via npm script
         run: npm run deploy
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
