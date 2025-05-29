@@ -6,35 +6,41 @@ on:
       - master # 또는 main
 
 permissions:
-  contents: write # 코드 푸시 권한
-  pages: write # GitHub Pages 권한
-  id-token: write # OIDC 인증용
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
     steps:
-      # 1) 코드 체크아웃
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Node.js 설치
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
 
-      # 3) 의존성 설치
       - name: Install dependencies
         run: npm ci
 
-      # 4) 프로젝트 빌드
       - name: Build
         run: npm run build
 
-      # 5) GitHub Pages 배포 (npm 스크립트 사용)
-      - name: Deploy to GitHub Pages
+      # --- 여기에 사용자 정보를 설정해야 합니다 ---
+      - name: Configure Git author
+        run: |
+          git config --global user.name "baebini"
+          git config --global user.email "baebini1997@gmail.com"
+
+      - name: Deploy to GitHub Pages via npm script
         run: npm run deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
