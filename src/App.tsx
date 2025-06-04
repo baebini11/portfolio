@@ -4,6 +4,7 @@ import naturalFlow from "./assets/Natural Flow.mp3";
 // import secondTrack from "./assets/SecondTrack.mp3";
 // import thirdTrack from "./assets/ThirdTrack.mp3";
 import backImg from "./assets/녹색배경.png";
+import ProfileCard from "./ProfileCard";
 
 // 플레이리스트 설정
 const tracks = [
@@ -23,6 +24,7 @@ export default function MusicPlayer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setPlaying] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [canvasWidth, setCanvasWidth] = useState(0);
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
@@ -206,7 +208,15 @@ const drawSpectrum = () => {
       </button>
 
       <div className={`relative z-10 flex flex-col items-center justify-center h-full ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-        <h1 className="text-4xl font-bold mb-6">baebini's Flow</h1>
+        <h1 className="text-4xl font-bold mb-6">
+          <span
+            className="cursor-pointer transition-transform hover:scale-110"
+            onClick={() => setShowProfile(true)}
+          >
+            baebini
+          </span>
+          's Flow
+        </h1>
         <p className="mb-4">Now Playing: {tracks[currentIndex].title}</p>
         <div className="flex space-x-4 mb-6">
           <button
@@ -246,6 +256,7 @@ const drawSpectrum = () => {
       <audio ref={audioRef} loop playsInline preload="auto">
         <source src={tracks[currentIndex].src} />
       </audio>
+      <ProfileCard visible={showProfile} onClose={() => setShowProfile(false)} />
     </div>
   );
 }
