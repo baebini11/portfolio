@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
-import naturalFlow from "./assets/Natural Flow.mp3";
+import naturalFlow from "./assets/natural-flow.mp3";
 // import secondTrack from "./assets/SecondTrack.mp3";
 // import thirdTrack from "./assets/ThirdTrack.mp3";
 import backImg from "./assets/녹색배경.png";
+import ProfileCard from "./ProfileCard";
+import Loader from "./Loader";
 
 // 플레이리스트 설정
 const tracks = [
@@ -23,6 +25,8 @@ export default function MusicPlayer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setPlaying] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [canvasWidth, setCanvasWidth] = useState(0);
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
@@ -32,6 +36,11 @@ export default function MusicPlayer() {
   const ctxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // 마우스 클릭 시 원형 파동 효과
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -145,7 +154,7 @@ const drawSpectrum = () => {
       );
 
       // 레이블 표시
-      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      ctx.fillStyle = darkMode ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)";
       ctx.fillText(
         range.label,
         i * barWidth + barWidth / 2,
@@ -172,9 +181,11 @@ const drawSpectrum = () => {
   const prevTrack = () =>
     setCurrentIndex((idx) => (idx - 1 + tracks.length) % tracks.length);
 
+  if (loading) return <Loader />;
+
   return (
     <div
-      className={`relative w-full h-screen overflow-hidden ${darkMode ? "bg-gray-900" : "bg-gray-100"}`}
+      className={`relative w-full h-screen overflow-hidden fade-up ${darkMode ? "bg-gray-900" : "bg-gray-100"}`}
       ref={containerRef}
       onMouseDown={handleClick}
     >
@@ -206,9 +217,17 @@ const drawSpectrum = () => {
       </button>
 
       <div className={`relative z-10 flex flex-col items-center justify-center h-full ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-        <h1 className="text-4xl font-bold mb-6">baebini's Flow</h1>
-        <p className="mb-4">Now Playing: {tracks[currentIndex].title}</p>
-        <div className="flex space-x-4 mb-6">
+        <h1 className="text-4xl font-bold mb-6 fade-up" style={{animationDelay:'0.2s'}}>
+          <span
+            className="cursor-pointer transition-transform hover:scale-110 hover:text-blue-500"
+            onClick={() => setShowProfile(true)}
+          >
+            baebini
+          </span>
+          's Flow
+        </h1>
+        <p className="mb-4 fade-up" style={{animationDelay:'0.4s'}}>Now Playing: {tracks[currentIndex].title}</p>
+        <div className="flex space-x-4 mb-6 fade-up" style={{animationDelay:'0.6s'}}>
           <button
             onClick={prevTrack}
             className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
@@ -246,6 +265,7 @@ const drawSpectrum = () => {
       <audio ref={audioRef} loop playsInline preload="auto">
         <source src={tracks[currentIndex].src} />
       </audio>
+      <ProfileCard visible={showProfile} onClose={() => setShowProfile(false)} />
     </div>
   );
 }
