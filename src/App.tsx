@@ -22,6 +22,7 @@ const freqRanges = [
 export default function MusicPlayer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setPlaying] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const [canvasWidth, setCanvasWidth] = useState(0);
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
@@ -173,7 +174,7 @@ const drawSpectrum = () => {
 
   return (
     <div
-      className="relative w-full h-screen overflow-hidden"
+      className={`relative w-full h-screen overflow-hidden ${darkMode ? "bg-gray-900" : "bg-gray-100"}`}
       ref={containerRef}
       onMouseDown={handleClick}
     >
@@ -181,6 +182,7 @@ const drawSpectrum = () => {
         className="absolute inset-0 bg-center bg-cover"
         style={{
           backgroundImage: `url(${backImg})`,
+          filter: darkMode ? "brightness(0.5)" : "brightness(1)",
           WebkitMaskImage:
             "linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))",
           maskImage: "linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))",
@@ -196,25 +198,32 @@ const drawSpectrum = () => {
         />
       ))}
 
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-white">
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+        className={`absolute top-4 right-4 z-20 px-3 py-2 rounded-md border ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-900'}`}
+      >
+        {darkMode ? '주간 모드' : '야간 모드'}
+      </button>
+
+      <div className={`relative z-10 flex flex-col items-center justify-center h-full ${darkMode ? 'text-white' : 'text-gray-900'}`}>
         <h1 className="text-4xl font-bold mb-6">baebini's Flow</h1>
         <p className="mb-4">Now Playing: {tracks[currentIndex].title}</p>
         <div className="flex space-x-4 mb-6">
           <button
             onClick={prevTrack}
-            className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600"
+            className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
           >
             Prev
           </button>
           <button
             onClick={togglePlay}
-            className="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500"
+            className={`px-6 py-3 rounded-2xl ${darkMode ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-blue-500 hover:bg-blue-400 text-white'}`}
           >
             {isPlaying ? "Pause" : "Play"}
           </button>
           <button
             onClick={nextTrack}
-            className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600"
+            className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
           >
             Next
           </button>
