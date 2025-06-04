@@ -87,5 +87,6 @@ canvas {
 }
 
 .fade-up {
+  opacity: 0;
   animation: fade-up 0.8s forwards;
 }

@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
-import naturalFlow from "./assets/Natural Flow.mp3";
+import naturalFlow from "./assets/natural-flow.mp3";
 // import secondTrack from "./assets/SecondTrack.mp3";
 // import thirdTrack from "./assets/ThirdTrack.mp3";
 import backImg from "./assets/녹색배경.png";
 import ProfileCard from "./ProfileCard";
 import Loader from "./Loader";
-
 
 // 플레이리스트 설정
 const tracks = [
