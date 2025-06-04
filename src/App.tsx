@@ -83,7 +83,7 @@ export default function MusicPlayer() {
   };
 
   // 스펙트럼 그리기 (Hz 구간별 바)
-  const drawSpectrum = () => {
+const drawSpectrum = () => {
     const canvas = canvasRef.current;
     const analyser = analyserRef.current;
     const ctx = canvas?.getContext("2d");
@@ -109,6 +109,7 @@ export default function MusicPlayer() {
 
     // 각 Hz 구간별로 바 그리기
     const barWidth = canvas.width / freqRanges.length;
+    const labelOffset = 20; // 공간 확보를 위해 하단 여백 설정
     freqRanges.forEach((range, i) => {
       const startBin = Math.floor((range.from / nyquist) * bufferLength);
       const endBin = Math.min(
@@ -118,23 +119,23 @@ export default function MusicPlayer() {
       let sum = 0;
       for (let j = startBin; j <= endBin; j++) sum += dataArray[j];
       const avg = sum / (endBin - startBin + 1);
-      const barHeight = (avg / 255) * canvas.height;
+      const barHeight = (avg / 255) * (canvas.height - labelOffset);
 
       // 바 그리기
-      ctx.fillStyle = `rgba(255,255,255,${avg / 255})`;
+      ctx.fillStyle = `rgba(255,255,255,${(avg / 255) * 0.5})`;
       ctx.fillRect(
         i * barWidth,
-        canvas.height - barHeight,
+        canvas.height - barHeight - labelOffset,
         barWidth - 2,
         barHeight
       );
 
       // 레이블 표시
-      ctx.fillStyle = "white";
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
       ctx.fillText(
         range.label,
         i * barWidth + barWidth / 2,
-        canvas.height - barHeight - 8
+        canvas.height - 4
       );
     });
 
@@ -161,8 +162,17 @@ export default function MusicPlayer() {
     <div
       className="relative w-full h-screen overflow-hidden"
       ref={containerRef}
-      style={{ backgroundImage: `url(${backImg})`, backgroundSize: "cover" }}
     >
+      <div
+        className="absolute inset-0 bg-center bg-cover"
+        style={{
+          backgroundImage: `url(${backImg})`,
+          WebkitMaskImage:
+            "linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))",
+          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))",
+          opacity: 0.8,
+        }}
+      />
       <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full" />
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-white">
