@@ -40,6 +40,7 @@ const ProfileCard: React.FC<Props> = ({ onClose, visible }) => {
             Studying in SSAFY since 2024.01~
           </p>
           <p className="mb-1 font-medium">STACKS</p>
+
           <div className="flex space-x-3 mb-2">
             <img src={unityLogo} alt="Unity" className="w-6 h-6" />
             <img src={reactLogo} alt="React" className="w-6 h-6" />
@@ -52,6 +53,7 @@ const ProfileCard: React.FC<Props> = ({ onClose, visible }) => {
           <p className="font-medium">Organizations</p>
           <p className="text-sm mb-2">baebini-team</p>
           <p className="text-xs text-gray-500">최근 GitHub 업데이트는 프로필을 참고하세요</p>
+
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import backImg from "./assets/녹색배경.png";
 import ProfileCard from "./ProfileCard";
 import Loader from "./Loader";
 
+
 // 플레이리스트 설정
 const tracks = [
   { title: "Natural Flow", src: naturalFlow },
