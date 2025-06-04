@@ -1,7 +1,8 @@
 import React from "react";
 import reactLogo from "./assets/react.svg";
 import unityLogo from "./assets/unity.svg";
-import profileImg from "../image.png";
+
+const avatarUrl = "https://avatars.githubusercontent.com/u/156386874?v=4";
 
 interface Props {
   onClose: () => void;
@@ -28,19 +29,31 @@ const ProfileCard: React.FC<Props> = ({ onClose, visible }) => {
           ✕
         </button>
         <img
-          src={profileImg}
+          src={avatarUrl}
           alt="profile"
           className="w-24 h-24 object-cover rounded mr-4"
         />
         <div className="flex-1 text-left">
           <h2 className="text-xl font-semibold mb-2">baebini</h2>
-          <p className="mb-1 font-medium">Stacks</p>
+          <p className="text-sm mb-2">
+            KOMCA musician since 2020~<br />
+            Studying in SSAFY since 2024.01~
+          </p>
+          <p className="mb-1 font-medium">STACKS</p>
+
           <div className="flex space-x-3 mb-2">
             <img src={unityLogo} alt="Unity" className="w-6 h-6" />
             <img src={reactLogo} alt="React" className="w-6 h-6" />
           </div>
+          <p className="text-sm mb-2">
+            FE : React(with Redux), TS, JS, Vue3(with Pinia), Electron<br />
+            BE : Django (DRF), MySQL, RESTAPI<br />
+            AND Unity
+          </p>
           <p className="font-medium">Organizations</p>
-          <p className="text-sm">baebini-team</p>
+          <p className="text-sm mb-2">baebini-team</p>
+          <p className="text-xs text-gray-500">최근 GitHub 업데이트는 프로필을 참고하세요</p>
+
         </div>
       </div>
     </div>

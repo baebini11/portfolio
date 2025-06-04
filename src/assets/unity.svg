@@ -1,3 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <polygon points="24 4 44 14 36 24 44 34 24 44 4 34 12 24 4 14 24 4" fill="black"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <polygon points="64 8 92 24 84 40 64 30 44 40 36 24 64 8" fill="black"/>
+  <polygon points="20 48 36 24 44 40 28 48 28 80 12 72 20 48" fill="black"/>
+  <polygon points="108 48 92 24 84 40 100 48 100 80 116 72 108 48" fill="black"/>
+  <polygon points="64 120 36 104 44 88 64 98 84 88 92 104 64 120" fill="black"/>
 </svg>
