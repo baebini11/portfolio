@@ -23,6 +23,7 @@ export default function MusicPlayer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setPlaying] = useState(false);
   const [canvasWidth, setCanvasWidth] = useState(0);
+  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -30,6 +31,18 @@ export default function MusicPlayer() {
   const ctxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationRef = useRef<number | null>(null);
+
+  // 마우스 클릭 시 원형 파동 효과
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const id = Date.now();
+    setRipples((prev) => [...prev, { id, x, y }]);
+    setTimeout(() => {
+      setRipples((prev) => prev.filter((r) => r.id !== id));
+    }, 600);
+  };
 
   // 컨테이너 크기에 맞춰 캔버스 너비 설정
   useEffect(() => {
@@ -162,6 +175,7 @@ const drawSpectrum = () => {
     <div
       className="relative w-full h-screen overflow-hidden"
       ref={containerRef}
+      onMouseDown={handleClick}
     >
       <div
         className="absolute inset-0 bg-center bg-cover"
@@ -174,6 +188,13 @@ const drawSpectrum = () => {
         }}
       />
       <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full" />
+      {ripples.map((r) => (
+        <span
+          key={r.id}
+          className="ripple"
+          style={{ left: r.x, top: r.y, zIndex: 5 }}
+        />
+      ))}
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-white">
         <h1 className="text-4xl font-bold mb-6">baebini's Flow</h1>
