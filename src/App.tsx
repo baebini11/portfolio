@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
 import naturalFlow from "./assets/natural-flow.mp3";
 // import secondTrack from "./assets/SecondTrack.mp3";
@@ -28,7 +28,9 @@ export default function MusicPlayer() {
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [canvasWidth, setCanvasWidth] = useState(0);
-  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [ripples, setRipples] = useState<
+    { id: number; x: number; y: number }[]
+  >([]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -56,6 +58,7 @@ export default function MusicPlayer() {
 
   // 컨테이너 크기에 맞춰 캔버스 너비 설정
   useEffect(() => {
+    if (loading) return;
     const updateWidth = () => {
       if (containerRef.current) {
         setCanvasWidth(containerRef.current.clientWidth);
@@ -64,11 +67,13 @@ export default function MusicPlayer() {
     updateWidth();
     window.addEventListener("resize", updateWidth);
     return () => window.removeEventListener("resize", updateWidth);
-  }, []);
+  }, [loading]);
 
   // 오디오 및 비주얼라이저 설정
   useEffect(() => {
+    if (loading) return;
     const audio = audioRef.current;
+
     if (!audio) return;
 
     const ctx = new AudioContext();
@@ -85,7 +90,7 @@ export default function MusicPlayer() {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       ctx.close();
     };
-  }, []);
+  }, [loading]);
 
   // 재생/일시정지 토글
   const togglePlay = async () => {
@@ -106,7 +111,7 @@ export default function MusicPlayer() {
   };
 
   // 스펙트럼 그리기 (Hz 구간별 바)
-const drawSpectrum = () => {
+  const drawSpectrum = () => {
     const canvas = canvasRef.current;
     const analyser = analyserRef.current;
     const ctx = canvas?.getContext("2d");
@@ -155,11 +160,7 @@ const drawSpectrum = () => {
 
       // 레이블 표시
       ctx.fillStyle = darkMode ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)";
-      ctx.fillText(
-        range.label,
-        i * barWidth + barWidth / 2,
-        canvas.height - 4
-      );
+      ctx.fillText(range.label, i * barWidth + barWidth / 2, canvas.height - 4);
     });
 
     animationRef.current = requestAnimationFrame(drawSpectrum);
@@ -167,6 +168,7 @@ const drawSpectrum = () => {
 
   // 트랙 변경 시 재생 초기화
   useEffect(() => {
+    if (loading) return;
     const audio = audioRef.current;
     if (!audio) return;
     audio.load();
@@ -174,7 +176,7 @@ const drawSpectrum = () => {
       audio.play();
       drawSpectrum();
     }
-  }, [currentIndex]);
+  }, [currentIndex, loading]);
 
   // 플레이리스트 이동
   const nextTrack = () => setCurrentIndex((idx) => (idx + 1) % tracks.length);
@@ -185,7 +187,9 @@ const drawSpectrum = () => {
 
   return (
     <div
-      className={`relative w-full h-screen overflow-hidden fade-up ${darkMode ? "bg-gray-900" : "bg-gray-100"}`}
+      className={`relative w-full h-screen overflow-hidden fade-up ${
+        darkMode ? "bg-gray-900" : "bg-gray-100"
+      }`}
       ref={containerRef}
       onMouseDown={handleClick}
     >
@@ -211,13 +215,22 @@ const drawSpectrum = () => {
 
       <button
         onClick={() => setDarkMode(!darkMode)}
-        className={`absolute top-4 right-4 z-20 px-3 py-2 rounded-md border ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-900'}`}
+        className={`absolute top-4 right-4 z-20 px-3 py-2 rounded-md border ${
+          darkMode ? "bg-gray-700 text-white" : "bg-gray-200 text-gray-900"
+        }`}
       >
-        {darkMode ? '주간 모드' : '야간 모드'}
+        {darkMode ? "주간 모드" : "야간 모드"}
       </button>
 
-      <div className={`relative z-10 flex flex-col items-center justify-center h-full ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-        <h1 className="text-4xl font-bold mb-6 fade-up" style={{animationDelay:'0.2s'}}>
+      <div
+        className={`relative z-10 flex flex-col items-center justify-center h-full ${
+          darkMode ? "text-white" : "text-gray-900"
+        }`}
+      >
+        <h1
+          className="text-4xl font-bold mb-6 fade-up"
+          style={{ animationDelay: "0.2s" }}
+        >
           <span
             className="cursor-pointer transition-transform hover:scale-110 hover:text-blue-500"
             onClick={() => setShowProfile(true)}
@@ -226,46 +239,66 @@ const drawSpectrum = () => {
           </span>
           's Flow
         </h1>
-        <p className="mb-4 fade-up" style={{animationDelay:'0.4s'}}>Now Playing: {tracks[currentIndex].title}</p>
-        <div className="flex space-x-4 mb-6 fade-up" style={{animationDelay:'0.6s'}}>
+        <p className="mb-4 fade-up" style={{ animationDelay: "0.4s" }}>
+          Now Playing: {tracks[currentIndex].title}
+        </p>
+        <div
+          className="flex space-x-4 mb-6 fade-up"
+          style={{ animationDelay: "0.6s" }}
+        >
           <button
             onClick={prevTrack}
-            className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
+            className={`px-4 py-2 rounded-lg ${
+              darkMode
+                ? "bg-gray-700 hover:bg-gray-600 text-white"
+                : "bg-gray-200 hover:bg-gray-300 text-gray-900"
+            }`}
           >
             Prev
           </button>
           <button
             onClick={togglePlay}
-            className={`px-6 py-3 rounded-2xl ${darkMode ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-blue-500 hover:bg-blue-400 text-white'}`}
+            className={`px-6 py-3 rounded-2xl ${
+              darkMode
+                ? "bg-blue-600 hover:bg-blue-500 text-white"
+                : "bg-blue-500 hover:bg-blue-400 text-white"
+            }`}
           >
             {isPlaying ? "Pause" : "Play"}
           </button>
           <button
             onClick={nextTrack}
-            className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
+            className={`px-4 py-2 rounded-lg ${
+              darkMode
+                ? "bg-gray-700 hover:bg-gray-600 text-white"
+                : "bg-gray-200 hover:bg-gray-300 text-gray-900"
+            }`}
           >
             Next
           </button>
         </div>
         {/* <ul className="space-y-2">
-          {tracks.map((track, idx) => (
-            <li
-              key={idx}
-              className={`cursor-pointer ${
-                idx === currentIndex ? "text-blue-300" : "text-gray-400"
-              }`}
-              onClick={() => setCurrentIndex(idx)}
-            >
-              {track.title}
-            </li>
-          ))}
-        </ul> */}
+            {tracks.map((track, idx) => (
+              <li
+                key={idx}
+                className={`cursor-pointer ${
+                  idx === currentIndex ? "text-blue-300" : "text-gray-400"
+                }`}
+                onClick={() => setCurrentIndex(idx)}
+              >
+                {track.title}
+              </li>
+            ))}
+          </ul> */}
       </div>
 
       <audio ref={audioRef} loop playsInline preload="auto">
         <source src={tracks[currentIndex].src} />
       </audio>
-      <ProfileCard visible={showProfile} onClose={() => setShowProfile(false)} />
+      <ProfileCard
+        visible={showProfile}
+        onClose={() => setShowProfile(false)}
+      />
     </div>
   );
 }
