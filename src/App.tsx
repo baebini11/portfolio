@@ -31,13 +31,24 @@ export default function MusicPlayer() {
   const [ripples, setRipples] = useState<
     { id: number; x: number; y: number }[]
   >([]);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [seeking, setSeeking] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationRef = useRef<number | null>(null);
+
+  const formatTime = (time: number) => {
+    if (!time && time !== 0) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
@@ -68,6 +79,24 @@ export default function MusicPlayer() {
     window.addEventListener("resize", updateWidth);
     return () => window.removeEventListener("resize", updateWidth);
   }, [loading]);
+
+  // 오디오 재생 위치 및 길이 추적
+  useEffect(() => {
+    if (loading) return;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const onLoaded = () => setDuration(audio.duration);
+    const onTime = () => setCurrentTime(audio.currentTime);
+
+    audio.addEventListener("loadedmetadata", onLoaded);
+    audio.addEventListener("timeupdate", onTime);
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", onLoaded);
+      audio.removeEventListener("timeupdate", onTime);
+    };
+  }, [currentIndex, loading]);
 
   // 오디오 및 비주얼라이저 설정
   useEffect(() => {
@@ -172,6 +201,8 @@ export default function MusicPlayer() {
     const audio = audioRef.current;
     if (!audio) return;
     audio.load();
+    setCurrentTime(0);
+    setDuration(audio.duration);
     if (isPlaying) {
       audio.play();
       drawSpectrum();
@@ -182,6 +213,28 @@ export default function MusicPlayer() {
   const nextTrack = () => setCurrentIndex((idx) => (idx + 1) % tracks.length);
   const prevTrack = () =>
     setCurrentIndex((idx) => (idx - 1 + tracks.length) % tracks.length);
+
+  const updateSeek = (clientX: number) => {
+    const bar = progressRef.current;
+    const audio = audioRef.current;
+    if (!bar || !audio || !duration) return;
+    const rect = bar.getBoundingClientRect();
+    const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+    audio.currentTime = ratio * duration;
+    setCurrentTime(audio.currentTime);
+  };
+
+  const handleSeekStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    setSeeking(true);
+    updateSeek(e.clientX);
+  };
+
+  const handleSeekMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!seeking) return;
+    updateSeek(e.clientX);
+  };
+
+  const handleSeekEnd = () => setSeeking(false);
 
   if (loading) return <Loader />;
 
@@ -239,9 +292,30 @@ export default function MusicPlayer() {
           </span>
           's Flow
         </h1>
-        <p className="mb-4 fade-up" style={{ animationDelay: "0.4s" }}>
+        <p className="mb-2 fade-up" style={{ animationDelay: "0.4s" }}>
           Now Playing: {tracks[currentIndex].title}
         </p>
+        <div
+          className="mb-4 fade-up flex items-center w-full max-w-md"
+          style={{ animationDelay: "0.5s" }}
+        >
+          <div
+            ref={progressRef}
+            className="flex-1 h-2 bg-gray-300 rounded overflow-hidden"
+            onPointerDown={handleSeekStart}
+            onPointerMove={handleSeekMove}
+            onPointerUp={handleSeekEnd}
+            onPointerLeave={handleSeekEnd}
+          >
+            <div
+              className="h-full bg-green-500"
+              style={{ width: `${(currentTime / duration) * 100}%` }}
+            />
+          </div>
+          <span className="ml-2 text-sm whitespace-nowrap">
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </span>
+        </div>
         <div
           className="flex space-x-4 mb-6 fade-up border-none"
           style={{ animationDelay: "0.6s" }}
