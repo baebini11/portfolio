@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import naturalFlow from "./assets/natural-flow.mp3";
 // import secondTrack from "./assets/SecondTrack.mp3";
@@ -243,26 +243,27 @@ export default function MusicPlayer() {
           Now Playing: {tracks[currentIndex].title}
         </p>
         <div
-          className="flex space-x-4 mb-6 fade-up"
+          className="flex space-x-4 mb-6 fade-up border-none"
           style={{ animationDelay: "0.6s" }}
         >
           <button
             onClick={prevTrack}
             className={`px-4 py-2 rounded-lg ${
               darkMode
-                ? "bg-gray-700 hover:bg-gray-600 text-white"
-                : "bg-gray-200 hover:bg-gray-300 text-gray-900"
+                ? "bg-gray-700 hover:bg-gray-600 border-none text-white"
+                : "bg-gray-200 hover:bg-gray-300 border-none text-gray-900"
             }`}
           >
             Prev
           </button>
           <button
             onClick={togglePlay}
-            className={`px-6 py-3 rounded-2xl ${
+            className={`px-6 py-3 ${
               darkMode
-                ? "bg-blue-600 hover:bg-blue-500 text-white"
-                : "bg-blue-500 hover:bg-blue-400 text-white"
-            }`}
+                ? "bg-600 hover:bg-green-500 border-none text-white"
+                : "bg-500 hover:bg-green-400 border-none text-white"
+            } 
+            ${isPlaying ? "bg-green-600" : ""}`}
           >
             {isPlaying ? "Pause" : "Play"}
           </button>
@@ -270,8 +271,8 @@ export default function MusicPlayer() {
             onClick={nextTrack}
             className={`px-4 py-2 rounded-lg ${
               darkMode
-                ? "bg-gray-700 hover:bg-gray-600 text-white"
-                : "bg-gray-200 hover:bg-gray-300 text-gray-900"
+                ? "bg-gray-700 hover:bg-gray-600 border-none text-white"
+                : "bg-gray-200 hover:bg-gray-300 border-none text-gray-900"
             }`}
           >
             Next
