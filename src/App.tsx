@@ -6,6 +6,7 @@ import naturalFlow from "./assets/natural-flow.mp3";
 import backImg from "./assets/녹색배경.png";
 import ProfileCard from "./ProfileCard";
 import Loader from "./Loader";
+import AvatarMenu from "./AvatarMenu";
 
 // 플레이리스트 설정
 const tracks = [
@@ -42,12 +43,25 @@ export default function MusicPlayer() {
   const ctxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationRef = useRef<number | null>(null);
+  const convolverRef = useRef<ConvolverNode | null>(null);
 
   const formatTime = (time: number) => {
     if (!time && time !== 0) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  const createImpulseResponse = (ctx: AudioContext) => {
+    const length = ctx.sampleRate * 2;
+    const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
+    for (let ch = 0; ch < impulse.numberOfChannels; ch++) {
+      const channelData = impulse.getChannelData(ch);
+      for (let i = 0; i < length; i++) {
+        channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+      }
+    }
+    return impulse;
   };
 
   useEffect(() => {
@@ -108,6 +122,8 @@ export default function MusicPlayer() {
     const ctx = new AudioContext();
     const srcNode = ctx.createMediaElementSource(audio);
     const analyser = ctx.createAnalyser();
+    const convolver = ctx.createConvolver();
+    convolver.buffer = createImpulseResponse(ctx);
     analyser.fftSize = 2048;
     srcNode.connect(analyser);
     analyser.connect(ctx.destination);
@@ -209,6 +225,23 @@ export default function MusicPlayer() {
     }
   }, [currentIndex, loading]);
 
+  // 프로필 창 열릴 때 리버브 연결
+  useEffect(() => {
+    if (loading) return;
+    const ctx = ctxRef.current;
+    const analyser = analyserRef.current;
+    const convolver = convolverRef.current;
+    if (!ctx || !analyser || !convolver) return;
+    analyser.disconnect();
+    convolver.disconnect();
+    if (showProfile) {
+      analyser.connect(convolver);
+      convolver.connect(ctx.destination);
+    } else {
+      analyser.connect(ctx.destination);
+    }
+  }, [showProfile, loading]);
+
   // 플레이리스트 이동
   const nextTrack = () => setCurrentIndex((idx) => (idx + 1) % tracks.length);
   const prevTrack = () =>
@@ -280,6 +313,9 @@ export default function MusicPlayer() {
           darkMode ? "text-white" : "text-gray-900"
         }`}
       >
+        <div className="mb-4 fade-up" style={{ animationDelay: "0.1s" }}>
+          <AvatarMenu />
+        </div>
         <h1
           className="text-4xl font-bold mb-6 fade-up"
           style={{ animationDelay: "0.2s" }}
