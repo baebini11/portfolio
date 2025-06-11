@@ -7,6 +7,7 @@ import backImg from "./assets/녹색배경.png";
 import ProfileCard from "./ProfileCard";
 import Loader from "./Loader";
 import AvatarMenu from "./AvatarMenu";
+import { AboutSection, ProjectsSection, ContactSection } from "./sections";
 
 // 플레이리스트 설정
 const tracks = [
@@ -272,123 +273,128 @@ export default function MusicPlayer() {
   if (loading) return <Loader />;
 
   return (
-    <div
-      className={`relative w-full h-screen overflow-hidden fade-up ${
-        darkMode ? "bg-gray-900" : "bg-gray-100"
-      }`}
-      ref={containerRef}
-      onMouseDown={handleClick}
-    >
-      <div
-        className="absolute inset-0 bg-center bg-cover"
-        style={{
-          backgroundImage: `url(${backImg})`,
-          filter: darkMode ? "brightness(0.5)" : "brightness(1)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))",
-          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))",
-          opacity: 0.8,
-        }}
-      />
-      <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full" />
-      {ripples.map((r) => (
-        <span
-          key={r.id}
-          className="ripple"
-          style={{ left: r.x, top: r.y, zIndex: 5 }}
-        />
-      ))}
-
-      <button
-        onClick={() => setDarkMode(!darkMode)}
-        className={`absolute top-4 right-4 z-20 px-3 py-2 rounded-md border ${
-          darkMode ? "bg-gray-700 text-white" : "bg-gray-200 text-gray-900"
+    <div className={darkMode ? "dark" : ""}>
+      <section
+        className={`relative w-full h-screen overflow-hidden fade-up ${
+          darkMode ? "bg-gray-900" : "bg-gray-100"
         }`}
+        ref={containerRef}
+        onMouseDown={handleClick}
       >
-        {darkMode ? "주간 모드" : "야간 모드"}
-      </button>
-
-      <div
-        className={`relative z-10 flex flex-col items-center justify-center h-full ${
-          darkMode ? "text-white" : "text-gray-900"
-        }`}
-      >
-        <div className="mb-4 fade-up" style={{ animationDelay: "0.1s" }}>
-          <AvatarMenu />
-        </div>
-        <h1
-          className="text-4xl font-bold mb-6 fade-up"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <span
-            className="cursor-pointer transition-transform hover:scale-110 hover:text-blue-500"
-            onClick={() => setShowProfile(true)}
-          >
-            baebini
-          </span>
-          's Flow
-        </h1>
-        <p className="mb-2 fade-up" style={{ animationDelay: "0.4s" }}>
-          Now Playing: {tracks[currentIndex].title}
-        </p>
         <div
-          className="mb-4 fade-up flex items-center w-full max-w-md"
-          style={{ animationDelay: "0.5s" }}
+          className="absolute inset-0 bg-center bg-cover"
+          style={{
+            backgroundImage: `url(${backImg})`,
+            filter: darkMode ? "brightness(0.5)" : "brightness(1)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))",
+            maskImage:
+              "linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))",
+            opacity: 0.8,
+          }}
+        />
+        <canvas
+          ref={canvasRef}
+          className="absolute top-0 left-0 w-full h-full"
+        />
+        {ripples.map((r) => (
+          <span
+            key={r.id}
+            className="ripple"
+            style={{ left: r.x, top: r.y, zIndex: 5 }}
+          />
+        ))}
+
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className={`absolute top-4 right-4 z-20 px-3 py-2 rounded-md border ${
+            darkMode ? "bg-gray-700 text-white" : "bg-gray-200 text-gray-900"
+          }`}
         >
+          {darkMode ? "주간 모드" : "야간 모드"}
+        </button>
+
+        <div
+          className={`relative z-10 flex flex-col items-center justify-center h-full ${
+            darkMode ? "text-white" : "text-gray-900"
+          }`}
+        >
+          <div className="mb-4 fade-up" style={{ animationDelay: "0.1s" }}>
+            <AvatarMenu />
+          </div>
+          <h1
+            className="text-4xl font-bold mb-6 fade-up"
+            style={{ animationDelay: "0.2s" }}
+          >
+            <span
+              className="cursor-pointer transition-transform hover:scale-110 hover:text-blue-500"
+              onClick={() => setShowProfile(true)}
+            >
+              baebini
+            </span>
+            's Flow
+          </h1>
+          <p className="mb-2 fade-up" style={{ animationDelay: "0.4s" }}>
+            Now Playing: {tracks[currentIndex].title}
+          </p>
           <div
-            ref={progressRef}
-            className="flex-1 h-2 bg-gray-300 rounded overflow-hidden"
-            onPointerDown={handleSeekStart}
-            onPointerMove={handleSeekMove}
-            onPointerUp={handleSeekEnd}
-            onPointerLeave={handleSeekEnd}
+            className="mb-4 fade-up flex items-center w-full max-w-md"
+            style={{ animationDelay: "0.5s" }}
           >
             <div
-              className="h-full bg-green-500"
-              style={{ width: `${(currentTime / duration) * 100}%` }}
-            />
+              ref={progressRef}
+              className="flex-1 h-2 bg-gray-300 rounded overflow-hidden"
+              onPointerDown={handleSeekStart}
+              onPointerMove={handleSeekMove}
+              onPointerUp={handleSeekEnd}
+              onPointerLeave={handleSeekEnd}
+            >
+              <div
+                className="h-full bg-green-500"
+                style={{ width: `${(currentTime / duration) * 100}%` }}
+              />
+            </div>
+            <span className="ml-2 text-sm whitespace-nowrap">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
           </div>
-          <span className="ml-2 text-sm whitespace-nowrap">
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
-        </div>
-        <div
-          className="flex space-x-4 mb-6 fade-up border-none"
-          style={{ animationDelay: "0.6s" }}
-        >
-          <button
-            onClick={prevTrack}
-            className={`px-4 py-2 rounded-lg ${
-              darkMode
-                ? "bg-gray-700 hover:bg-gray-600 border-none text-white"
-                : "bg-gray-200 hover:bg-gray-300 border-none text-gray-900"
-            }`}
+          <div
+            className="flex space-x-4 mb-6 fade-up border-none"
+            style={{ animationDelay: "0.6s" }}
           >
-            Prev
-          </button>
-          <button
-            onClick={togglePlay}
-            className={`px-6 py-3 ${
-              darkMode
-                ? "bg-600 hover:bg-green-500 border-none text-white"
-                : "bg-500 hover:bg-green-400 border-none text-white"
-            } 
+            <button
+              onClick={prevTrack}
+              className={`px-4 py-2 rounded-lg ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 border-none text-white"
+                  : "bg-gray-200 hover:bg-gray-300 border-none text-gray-900"
+              }`}
+            >
+              Prev
+            </button>
+            <button
+              onClick={togglePlay}
+              className={`px-6 py-3 ${
+                darkMode
+                  ? "bg-600 hover:bg-green-500 border-none text-white"
+                  : "bg-500 hover:bg-green-400 border-none text-white"
+              } 
             ${isPlaying ? "bg-green-600" : ""}`}
-          >
-            {isPlaying ? "Pause" : "Play"}
-          </button>
-          <button
-            onClick={nextTrack}
-            className={`px-4 py-2 rounded-lg ${
-              darkMode
-                ? "bg-gray-700 hover:bg-gray-600 border-none text-white"
-                : "bg-gray-200 hover:bg-gray-300 border-none text-gray-900"
-            }`}
-          >
-            Next
-          </button>
-        </div>
-        {/* <ul className="space-y-2">
+            >
+              {isPlaying ? "Pause" : "Play"}
+            </button>
+            <button
+              onClick={nextTrack}
+              className={`px-4 py-2 rounded-lg ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 border-none text-white"
+                  : "bg-gray-200 hover:bg-gray-300 border-none text-gray-900"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+          {/* <ul className="space-y-2">
             {tracks.map((track, idx) => (
               <li
                 key={idx}
@@ -401,15 +407,19 @@ export default function MusicPlayer() {
               </li>
             ))}
           </ul> */}
-      </div>
+        </div>
 
-      <audio ref={audioRef} loop playsInline preload="auto">
-        <source src={tracks[currentIndex].src} />
-      </audio>
-      <ProfileCard
-        visible={showProfile}
-        onClose={() => setShowProfile(false)}
-      />
+        <audio ref={audioRef} loop playsInline preload="auto">
+          <source src={tracks[currentIndex].src} />
+        </audio>
+        <ProfileCard
+          visible={showProfile}
+          onClose={() => setShowProfile(false)}
+        />
+      </section>
+      <AboutSection />
+      <ProjectsSection />
+      <ContactSection />
     </div>
   );
 }
