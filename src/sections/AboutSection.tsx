@@ -5,6 +5,7 @@ const AboutSection: React.FC = () => {
     <section
       id="profile"
       className="py-16 text-center bg-gray-100 dark:bg-gray-900"
+      data-aos="zoom-in"
     >
       <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">
         About Me

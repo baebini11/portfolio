@@ -17,6 +17,7 @@ const ProjectsSection: React.FC = () => {
     <section
       id="projects"
       className="py-16 text-center bg-white dark:bg-gray-800"
+      data-aos="zoom-in"
     >
       <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">
         Projects
