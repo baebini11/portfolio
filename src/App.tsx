@@ -18,9 +18,16 @@ const tracks = [
 
 // 원하는 Hz 구간별로 범위를 설정합니다
 const freqRanges = [
-  { label: "Low (20-250Hz)", from: 20, to: 250 },
-  { label: "Mid (250-2000Hz)", from: 250, to: 2000 },
-  { label: "High (2000-20000Hz)", from: 2000, to: 20000 },
+  { label: "20-60Hz", from: 20, to: 60 },
+  { label: "60-120Hz", from: 60, to: 120 },
+  { label: "120-250Hz", from: 120, to: 250 },
+  { label: "250-500Hz", from: 250, to: 500 },
+  { label: "500-1kHz", from: 500, to: 1000 },
+  { label: "1-2kHz", from: 1000, to: 2000 },
+  { label: "2-4kHz", from: 2000, to: 4000 },
+  { label: "4-6kHz", from: 4000, to: 6000 },
+  { label: "6-12kHz", from: 6000, to: 12000 },
+  { label: "12-20kHz", from: 12000, to: 20000 },
 ];
 
 export default function MusicPlayer() {
@@ -126,6 +133,7 @@ export default function MusicPlayer() {
     const convolver = ctx.createConvolver();
     convolver.buffer = createImpulseResponse(ctx);
     analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0.8;
     srcNode.connect(analyser);
     analyser.connect(ctx.destination);
 
@@ -166,7 +174,8 @@ export default function MusicPlayer() {
 
     // 캔버스 크기 동기화
     canvas.width = canvasWidth;
-    canvas.height = containerRef.current?.clientHeight || window.innerHeight;
+    canvas.height =
+      (containerRef.current?.clientHeight as number) || window.innerHeight;
 
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
@@ -193,7 +202,7 @@ export default function MusicPlayer() {
       let sum = 0;
       for (let j = startBin; j <= endBin; j++) sum += dataArray[j];
       const avg = sum / (endBin - startBin + 1);
-      const barHeight = (avg / 255) * (canvas.height - labelOffset);
+      const barHeight = (avg / 510) * (canvas.height - labelOffset);
 
       // 바 그리기
       ctx.fillStyle = `rgba(255,255,255,${(avg / 255) * 0.5})`;
@@ -206,7 +215,7 @@ export default function MusicPlayer() {
 
       // 레이블 표시
       ctx.fillStyle = darkMode ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)";
-      ctx.fillText(range.label, i * barWidth + barWidth / 2, canvas.height - 4);
+      // ctx.fillText(range.label, i * barWidth + barWidth / 2, canvas.height - 4);
     });
 
     animationRef.current = requestAnimationFrame(drawSpectrum);
