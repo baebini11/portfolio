@@ -60,6 +60,16 @@ export default function MusicPlayer() {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
+  const lightenColor = (color: string, factor: number) => {
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    const nr = Math.round(r + (255 - r) * factor);
+    const ng = Math.round(g + (255 - g) * factor);
+    const nb = Math.round(b + (255 - b) * factor);
+    return `rgba(${nr},${ng},${nb},0.8)`;
+  };
+
   const createImpulseResponse = (ctx: AudioContext) => {
     const length = ctx.sampleRate * 2;
     const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
@@ -172,10 +182,13 @@ export default function MusicPlayer() {
     const audioCtx = ctxRef.current;
     if (!canvas || !analyser || !ctx || !audioCtx) return;
 
-    // 캔버스 크기 동기화
-    canvas.width = canvasWidth;
+    // 캔버스 크기 동기화 (고해상도 화면 대응)
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvasWidth * dpr;
     canvas.height =
-      (containerRef.current?.clientHeight as number) || window.innerHeight;
+      ((containerRef.current?.clientHeight as number) || window.innerHeight) * dpr;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
 
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
@@ -204,8 +217,9 @@ export default function MusicPlayer() {
       const avg = sum / (endBin - startBin + 1);
       const barHeight = (avg / 510) * (canvas.height - labelOffset);
 
-      // 바 그리기
-      ctx.fillStyle = `rgba(255,255,255,${(avg / 255) * 0.5})`;
+      // 바 그리기 - 배경색에 가깝게, 강해질수록 연하게
+      const baseColor = darkMode ? "#111827" : "#f3f4f6";
+      ctx.fillStyle = lightenColor(baseColor, avg / 255);
       ctx.fillRect(
         i * barWidth,
         canvas.height - barHeight - labelOffset,
