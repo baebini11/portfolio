@@ -30,6 +30,14 @@ const freqRanges = [
   { label: "12-20kHz", from: 12000, to: 20000 },
 ];
 
+// ====== 새로 추가된 설정 ======
+// 모바일 성능 최적화를 위해 내부 픽셀 비율을 최대 2 이하로 제한합니다.
+const MAX_DPR = 2;
+// 스펙트럼 민감도 조절 변수 (0 ~ 255 사이). 값이 클수록 더 둔감해집니다.
+const NOISE_FLOOR = 40;
+const SMOOTHING = 0.65; // 원래 0.8 → 더 빠르게 반응하도록 조정
+// ====
+
 export default function MusicPlayer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setPlaying] = useState(false);
@@ -143,12 +151,14 @@ export default function MusicPlayer() {
     const convolver = ctx.createConvolver();
     convolver.buffer = createImpulseResponse(ctx);
     analyser.fftSize = 2048;
-    analyser.smoothingTimeConstant = 0.8;
+    analyser.smoothingTimeConstant = SMOOTHING;
     srcNode.connect(analyser);
     analyser.connect(ctx.destination);
 
+    // === 연결 정보 저장 (이전 코드에서는 누락) ===
     ctxRef.current = ctx;
     analyserRef.current = analyser;
+    convolverRef.current = convolver;
 
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
@@ -182,11 +192,13 @@ export default function MusicPlayer() {
     const audioCtx = ctxRef.current;
     if (!canvas || !analyser || !ctx || !audioCtx) return;
 
-    // 캔버스 크기 동기화 (고해상도 화면 대응)
-    const dpr = window.devicePixelRatio || 1;
+    // 성능 안정을 위해 canvas 해상도를 최대 2배까지만 올립니다.
+    const rawDpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(rawDpr, MAX_DPR);
     canvas.width = canvasWidth * dpr;
-    canvas.height =
-      ((containerRef.current?.clientHeight as number) || window.innerHeight) * dpr;
+    const containerHeight =
+      (containerRef.current?.clientHeight as number) || window.innerHeight;
+    canvas.height = containerHeight * dpr;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
 
@@ -199,37 +211,38 @@ export default function MusicPlayer() {
     const nyquist = sampleRate / 2;
 
     // 캔버스 초기화
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height / 2);
     ctx.font = "12px sans-serif";
     ctx.textAlign = "center";
 
     // 각 Hz 구간별로 바 그리기
     const barWidth = canvas.width / freqRanges.length;
     const labelOffset = 20; // 공간 확보를 위해 하단 여백 설정
+
     freqRanges.forEach((range, i) => {
       const startBin = Math.floor((range.from / nyquist) * bufferLength);
       const endBin = Math.min(
         Math.floor((range.to / nyquist) * bufferLength),
         bufferLength - 1
       );
+
       let sum = 0;
       for (let j = startBin; j <= endBin; j++) sum += dataArray[j];
       const avg = sum / (endBin - startBin + 1);
-      const barHeight = (avg / 510) * (canvas.height - labelOffset);
+
+      // 민감도 조정: NOISE_FLOOR 이하의 값은 무시합니다.
+      const normalized = Math.max(avg - NOISE_FLOOR, 0) / (255 - NOISE_FLOOR);
+      const barHeight = normalized * (canvas.height - labelOffset);
 
       // 바 그리기 - 배경색에 가깝게, 강해질수록 연하게
       const baseColor = darkMode ? "#111827" : "#f3f4f6";
-      ctx.fillStyle = lightenColor(baseColor, avg / 255);
+      ctx.fillStyle = lightenColor(baseColor, normalized);
       ctx.fillRect(
         i * barWidth,
         canvas.height - barHeight - labelOffset,
         barWidth - 2,
         barHeight
       );
-
-      // 레이블 표시
-      ctx.fillStyle = darkMode ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)";
-      // ctx.fillText(range.label, i * barWidth + barWidth / 2, canvas.height - 4);
     });
 
     animationRef.current = requestAnimationFrame(drawSpectrum);
@@ -361,7 +374,7 @@ export default function MusicPlayer() {
             Now Playing: {tracks[currentIndex].title}
           </p>
           <div
-            className="mb-4 fade-up flex items-center w-full max-w-md"
+            className="mb-4 fade-up flex-col w-full items-center align max-w-md"
             style={{ animationDelay: "0.5s" }}
           >
             <div
@@ -417,19 +430,6 @@ export default function MusicPlayer() {
               Next
             </button>
           </div>
-          {/* <ul className="space-y-2">
-            {tracks.map((track, idx) => (
-              <li
-                key={idx}
-                className={`cursor-pointer ${
-                  idx === currentIndex ? "text-blue-300" : "text-gray-400"
-                }`}
-                onClick={() => setCurrentIndex(idx)}
-              >
-                {track.title}
-              </li>
-            ))}
-          </ul> */}
         </div>
 
         <audio ref={audioRef} loop playsInline preload="auto">
